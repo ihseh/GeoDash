@@ -41,6 +41,8 @@ class GameView(arcade.View):
         self.yVelDecrease = 1.5
         self.platformSpeed = 8
         self.stepsTillLand = 0
+        self.jumpRotations = 1
+        self.rotationDirection = 1
         self.player = Player(arcade.Sprite("playerSprite.png", center_x= 150, center_y= self.ground + 50, scale = .4))
         #init platforms
         self.platforms = []
@@ -109,7 +111,7 @@ class GameView(arcade.View):
                 self.player.onFloor = False
                 self.yVel -= self.yVelDecrease
                 if self.midJump:
-                    self.player.sprite.angle -= 90/self.stepsTillLand
+                    self.player.sprite.angle -= self.rotationDirection * 90 * self.jumpRotations / self.stepsTillLand
 
             #move platforms
             for platform in self.platforms:
@@ -127,6 +129,22 @@ class GameView(arcade.View):
         found = False
         self.midJump = True
         self.yVel = self.jumpHeight
+        #Randomize jump rotation values
+        randNum = random.randint(0,100)
+        if randNum < 70:
+            self.jumpRotations = 1
+        elif randNum < 85:
+            self.jumpRotations = 2
+        elif randNum < 95:
+            self.jumpRotations = 3
+        else:
+            self.jumpRotations = 4
+        randNum = random.randint(0,100)
+        if randNum < 90:
+            self.rotationDirection = 1
+        else:
+            self.rotationDirection = -1
+        #Calculate steps till player will land on ground or platform
         for x in range(24, 65):
             for platform in self.platforms:
                 if not found:
@@ -141,7 +159,7 @@ class GameView(arcade.View):
                         self.stepsTillLand = x
                         # print(f"{self.stepsTillLand} to ground")
                         break
-
+        
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.SPACE:
             if self.running: #if game is running
@@ -162,7 +180,11 @@ class GameView(arcade.View):
         if key == arcade.key.SPACE:
             self.jumping = False
     
-
+def getClosest(curr):
+    values = [0,90,180,270,360]
+    if curr > 360:
+        curr -= 360
+    return values[min(range(len(values)), key = lambda i: abs(values[i]-curr))]
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
 
