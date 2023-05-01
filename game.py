@@ -139,16 +139,20 @@ class GameView(arcade.View):
         # arcade.play_sound(self.jump_sound)
         #Randomize jump rotation values
         randNum = random.randint(0,100)
-        if randNum < 70:
+        if randNum < 60:
             self.jumpRotations = 1
-        elif randNum < 85:
+        elif randNum < 75:
             self.jumpRotations = 2
-        elif randNum < 95:
+        elif randNum < 85:
             self.jumpRotations = 3
-        else:
+        elif randNum < 93:
             self.jumpRotations = 4
+        elif randNum < 98:
+            self.jumpRotations = 5
+        else:
+            self.jumpRotations = 6
         randNum = random.randint(0,100)
-        if randNum < 90:
+        if randNum < 85:
             self.rotationDirection = 1
         else:
             self.rotationDirection = -1
