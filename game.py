@@ -43,6 +43,9 @@ class GameView(arcade.View):
         self.stepsTillLand = 0
         self.jumpRotations = 1
         self.rotationDirection = 1
+        self.land_sound = arcade.load_sound('land.wav', False)
+        self.jump_sound = arcade.load_sound('jump.wav', False)
+
         self.player = Player(arcade.Sprite("playerSprite.png", center_x= 150, center_y= self.ground + 50, scale = .4))
         #init platforms
         self.platforms = []
@@ -69,7 +72,7 @@ class GameView(arcade.View):
             self.score += 1   
             self.scoreLabel.text = str(math.trunc(self.score/float(10)))
             #Move player by yVel
-            ontoSurface = False #Sets to True if player is about to fall onto a surface (ground or platform)
+            ontoSurface = False #True if player is about to fall onto a surface (ground or platform)
             if self.yVel < 0 and abs(self.player.sprite.center_y - self.ground) < abs(self.yVel): #if player is about to hit the ground
                 self.player.sprite.center_y += -abs(self.player.sprite.center_y - self.ground)
                 ontoSurface = True
@@ -82,9 +85,13 @@ class GameView(arcade.View):
                             ontoSurface = True
                             # print(f"{self.steps}, landed on plat")
                             self.player.sprite.center_y += -abs(self.player.sprite.center_y - (self.ground + platform.height))
-            if not ontoSurface: #else, move by yVel
-                self.player.sprite.center_y += self.yVel
 
+            if ontoSurface: #play landing sound, quantize rotation
+                # arcade.play_sound(self.land_sound)
+                self.player.sprite.angle = getClosest(self.player.sprite.angle)
+            else: #else, move by yVel
+                self.player.sprite.center_y += self.yVel
+            
             #check if player is on floor
             if self.player.sprite.center_y > self.ground:
                 onGround = False
@@ -129,6 +136,7 @@ class GameView(arcade.View):
         found = False
         self.midJump = True
         self.yVel = self.jumpHeight
+        # arcade.play_sound(self.jump_sound)
         #Randomize jump rotation values
         randNum = random.randint(0,100)
         if randNum < 70:
@@ -181,9 +189,11 @@ class GameView(arcade.View):
             self.jumping = False
     
 def getClosest(curr):
-    values = [0,90,180,270,360]
+    values = [-360,-270,-180,-90,0,90,180,270,360]
     if curr > 360:
         curr -= 360
+    if curr < -360:
+        curr += 360
     return values[min(range(len(values)), key = lambda i: abs(values[i]-curr))]
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
