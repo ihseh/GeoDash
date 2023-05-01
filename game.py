@@ -19,7 +19,7 @@ class Platform():
 
     def regen(self, x = 0): #change platform size, update location. Optional x argument, used when restarting game
         self.width = random.randint(100, 600)
-        self.height = 50 * random.randint(1, 6)
+        self.height = 50 * random.randint(1, 3)
         if x == 0:
             self.x = 1500 + 100 * random.randint(0,5)
         else:
@@ -37,7 +37,7 @@ class GameView(arcade.View):
         self.yVel = 0
         self.jumping = False
         self.midJump = False
-        self.jumpHeight = 35
+        self.jumpHeight = 25
         self.yVelDecrease = 1.5
         self.platformSpeed = 8
         self.stepsTillLand = 0
@@ -50,7 +50,7 @@ class GameView(arcade.View):
         #init platforms
         self.platforms = []
         for i in range(7):
-            self.platforms.append(Platform(1000 + i * 300 * random.randint(0,4), random.randint(200, 500), 50 * random.randint(1, 6)))
+            self.platforms.append(Platform(1000 + i * 300 * random.randint(0,4), random.randint(200, 500), 50 * random.randint(1, 3)))
         #init score label
         self.scoreLabel = arcade.gui.UILabel(x = 750, y = 770, text = str(self.score), font_size = 14, text_color = arcade.color.BLACK, width = 100)
         self.scoreManager = arcade.gui.UIManager()
@@ -157,13 +157,13 @@ class GameView(arcade.View):
             for platform in self.platforms:
                 if not found:
                     if platform.x - platform.width/2 - 5 <= (self.player.sprite.center_x + (x * self.platformSpeed)) <= platform.x + platform.width/2:
-                        if (self.player.sprite.center_y + (35.75 * x) - (0.75 * (x ** 2))) >= (self.ground + platform.height) >= (self.player.sprite.center_y + (35.75 * (x+1)) - (0.75 * ((x+1) ** 2))):
+                        if (self.player.sprite.center_y + ((self.jumpHeight + (self.yVelDecrease/2)) * x) - ((self.yVelDecrease/2) * (x ** 2))) >= (self.ground + platform.height) >= (self.player.sprite.center_y + ((self.jumpHeight + (self.yVelDecrease/2)) * (x+1)) - ((self.yVelDecrease/2) * ((x+1) ** 2))):
                             self.stepsTillLand = x
                             # print(f"{self.stepsTillLand} to platform")
                             found = True
                             break                  
                 if not found:
-                    if (self.player.sprite.center_y + (35.75 * x) - (0.75 * (x ** 2))) >= self.ground >= (self.player.sprite.center_y + (35.75 * (x+1)) - (0.75 * ((x+1) ** 2))):
+                    if (self.player.sprite.center_y + ((self.jumpHeight + (self.yVelDecrease/2)) * x) - ((self.yVelDecrease/2) * (x ** 2))) >= self.ground >= (self.player.sprite.center_y + ((self.jumpHeight + (self.yVelDecrease/2)) * (x+1)) - ((self.yVelDecrease/2) * ((x+1) ** 2))):
                         self.stepsTillLand = x
                         # print(f"{self.stepsTillLand} to ground")
                         break
