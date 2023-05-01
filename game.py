@@ -34,6 +34,8 @@ class GameView(arcade.View):
         self.running = True
         self.ground = 200
         self.yVel = 0
+        self.jumping = False
+        self.jumpHeight = 35
         self.player = Player(arcade.Sprite("playerSprite.png", center_x= 150, center_y= self.ground + 50, scale = .4))
         #init platforms
         self.platforms = []
@@ -60,7 +62,7 @@ class GameView(arcade.View):
             self.score += 1   
             self.scoreLabel.text = str(math.trunc(self.score/float(10)))
             #Move player by yVel
-            ontoSurface = False
+            ontoSurface = False #Sets to True if player is about to fall onto a surface (ground or platform)
             if self.yVel < 0 and abs(self.player.sprite.center_y - self.ground) < abs(self.yVel): #if player is about to hit the ground
                 self.player.sprite.center_y += -abs(self.player.sprite.center_y - self.ground)
                 ontoSurface = True
@@ -86,17 +88,16 @@ class GameView(arcade.View):
                     if self.yVel <= 0 and self.ground + platform.height >= self.player.sprite.center_y:
                         onPlat = True
 
-            #update player.onFloor if on ground or on platform
+            #update yVel
             if onGround or onPlat:
                 self.player.onFloor = True
+                self.yVel = 0
+                if self.jumping:
+                    self.yVel = 35
             else:
                 self.player.onFloor = False
-
-            #update yVel
-            if not self.player.onFloor:
                 self.yVel -= 1.5
-            else:
-                self.yVel = 0
+
 
             #move platforms
             for platform in self.platforms:
@@ -113,15 +114,18 @@ class GameView(arcade.View):
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.SPACE:
             if self.running: #if game is running
+                self.jumping = True
                 if self.player.onFloor:
-                    self.yVel = 35 #jump
+                    self.yVel = self.jumpHeight #jump
             else: #if game is over
                 for i in range(7):
                     self.platforms[i].regen(1000 + i * 300 * random.randint(0,4)) #regen platforms
                 self.score = 0
                 self.running = True #restart
-
-
+    
+    def on_key_release(self, key, key_modifier):
+        if key == arcade.key.SPACE:
+            self.jumping = False
 
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
