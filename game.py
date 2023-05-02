@@ -29,11 +29,13 @@ class Platform():
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
-        arcade.set_background_color(arcade.color.WHITE)
+        arcade.set_background_color((200,235,255))
         self.steps = 0
         self.score = float(0)
         self.running = True
         self.ground = 200
+        self.groundImg = arcade.load_texture("ground.png")
+        self.platformImg = arcade.load_texture("platform.png")
         self.yVel = 0
         self.jumping = False
         self.midJump = False
@@ -59,14 +61,22 @@ class GameView(arcade.View):
     def on_draw(self):
         arcade.start_render()
         self.clear()
-        arcade.draw_rectangle_filled(center_x = 400, center_y = self.ground/2 - 14, width = 800, height = self.ground, color = (20,100,100))
+        #draw ground
+        # arcade.draw_rectangle_filled(center_x = 400, center_y = self.ground/2 - 14, width = 800, height = self.ground, color = (20,100,100))
+        arcade.draw_lrwh_rectangle_textured(0, 0,
+                                            SCREEN_WIDTH, self.ground - 14,
+                                            self.groundImg)
+        #draw platforms
         for platform in self.platforms:
-            arcade.draw_rectangle_filled(center_x = platform.x, center_y = self.ground-14 + platform.height/2 , width = platform.width, height = platform.height, color = (150,50,50))
+            arcade.draw_rectangle_filled(center_x = platform.x, center_y = self.ground-14 + platform.height/2 , width = platform.width, height = platform.height, color = (240,0,0))
+            # arcade.draw_lrwh_rectangle_textured(platform.x - platform.width/2, self.ground-14, width = platform.width, height = platform.height, texture = self.platformImg)
+        #draw score
         self.scoreManager.draw()
+        #draw player
         self.player.sprite.draw()
 
 
-    def on_update(self, delta_time):
+    def on_update(self, delta_time = .1):
         if self.running:
             #update score
             self.score += 1   
