@@ -12,19 +12,42 @@ class Player():
         self.onFloor = True
 
 class Platform():
-    def __init__(self, x, width, height):
-        self.x = x
-        self.width = width
-        self.height = height
+    def __init__(self):
+        self.x = 0
+        self.width = 0
+        self.height = 0
 
     def regen(self, x = 0): #change platform size, update location. Optional x argument, used when restarting game
-        self.width = random.randint(100, 600)
+        self.width = random.randint(1, 25) * 25
         self.height = 50 * random.randint(1, 3)
         if x == 0:
             self.x = 1500 + 100 * random.randint(0,5)
         else:
             self.x = x
 
+class Spike():
+    def __init__(self):
+        self.x = 0
+        self.width = 100
+        self.height = 150
+    
+    def regen(self, platforms):
+        startLoc = 1000
+        tryLoc = startLoc + 20 * random.randint(1,25)
+        placed = False
+        while not placed:
+            placed = True
+            for plat in platforms:
+                if (plat.x - plat.width/2 > tryLoc + self.width/2) and abs(plat.x - plat.width/2 - tryLoc+self.width/2) < 300:
+                    placed = False
+                    startLoc += 100
+                    tryLoc = startLoc + 20 * random.randint(1,25)
+                    print("Couldn't place spike")
+                    break
+        print("Found location for spike")
+        self.x = tryLoc
+                    
+            
 
 class GameView(arcade.View):
     def __init__(self):
@@ -52,7 +75,13 @@ class GameView(arcade.View):
         #init platforms
         self.platforms = []
         for i in range(7):
-            self.platforms.append(Platform(1000 + i * 300 * random.randint(0,4), random.randint(200, 500), 50 * random.randint(1, 3)))
+            self.platforms.append(Platform())
+            self.platforms[i].regen(1000 + i * 300 * random.randint(0,4))
+        #init spikes
+        # self.spikes = []
+        # for i in range(1):
+        #     self.spikes.append(Spike())
+        #     self.spikes[i].regen(self.platforms)
         #init score label
         self.scoreLabel = arcade.gui.UILabel(x = 750, y = 770, text = str(self.score), font_size = 14, text_color = arcade.color.BLACK, width = 100)
         self.scoreManager = arcade.gui.UIManager()
@@ -70,6 +99,9 @@ class GameView(arcade.View):
         for platform in self.platforms:
             arcade.draw_rectangle_filled(center_x = platform.x, center_y = self.ground-14 + platform.height/2 , width = platform.width, height = platform.height, color = (240,0,0))
             # arcade.draw_lrwh_rectangle_textured(platform.x - platform.width/2, self.ground-14, width = platform.width, height = platform.height, texture = self.platformImg)
+        #draw spikes
+        # for spike in self.spikes:
+        #     arcade.draw_rectangle_filled(center_x = spike.x, center_y = self.ground-14 + spike.height/2 , width = spike.width, height = spike.height, color = (0,250,0))
         #draw score
         self.scoreManager.draw()
         #draw player
@@ -136,6 +168,11 @@ class GameView(arcade.View):
                 if platform.x < -800:
                     platform.regen()
             
+            #move spikes
+            # for spike in self.spikes:
+            #     spike.x -= self.platformSpeed
+            #     if spike.x < -800:
+            #             spike.regen(self.platforms)
             #check death
             for platform in self.platforms:
                 if platform.x - platform.width/2 < self.player.sprite.center_x + 17 < platform.x + platform.width/2:
